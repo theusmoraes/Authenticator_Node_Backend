@@ -5,22 +5,10 @@ module.exports ={
         const {user, password} = req.body
         console.log(user + " " + password)
         let mongoUser = await User.findOne({email: user})
-        if (mongoUser){
-            if(bycrpt.compareSync(password, mongoUser.password)){
-                console.log("SENHA ACEITA")
-                res.send("LOGADO");
-            }else{
-                console.log("SENHA Errada")
-
-                res.send("Email ou senha Incorreto")
-            }
-
-        }else{
-            console.log("Email Errado")
-
-            res.send("Email ou senha Incorreto")
+        if (mongoUser && bycrpt.compareSync(password, mongoUser.password)){
+                res.send(mongoUser)
         }
-
+        res.status(401).send("Email ou Senha Invalidos")
     },
 
     async register(req, res){
