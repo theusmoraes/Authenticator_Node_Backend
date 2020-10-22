@@ -8,22 +8,26 @@ module.exports ={
         if (mongoUser && bycrpt.compareSync(password, mongoUser.password)){
                 res.send(mongoUser)
         }
-        res.status(401).send("Email ou Senha Invalidos")
+        res.status(401).send({"error" : "Email ou Senha Invalidos"})
     },
 
-    async register(req, res){
+    async register(req, res, next){
+
         const {email, password, name} = req.body
+
         let user = await User.findOne({email})
-        if (!user){
-            bycrptPassword = bycrpt.hashSync(password, 10)
-            try {
+        try {
+            if (!user){
+                bycrptPassword = bycrpt.hashSync(password, 10)
                 user = await User.create({name: name, email: email, password:bycrptPassword})
-            }catch(e){
-                console.log(e)
+                res.send(user)
+            }else{
+                res.status(401).send({"error" : "Email ja Cadastrado"})
             }
-        }else{
-            console.log("Email ja cadastrado")
+        }catch(err){
+            const error = new Error(err);
+            error.httpStatusCode = 500;
+            return next(error)
         }
-        res.send("Registro realizado")
     }
 }
